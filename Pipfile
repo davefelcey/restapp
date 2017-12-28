@@ -8,6 +8,11 @@ name = "pypi"
 [packages]
 
 gunicorn = "*"
+"html2text" = "*"
+pandas = "*"
+sklearn = "*"
+scipy = "*"
+language-check = "*"
 
 
 [dev-packages]
