@@ -124,20 +124,12 @@ def get_requirements(model,job):
 
     return questions
 
-# def app(environ, start_response):
 @app.route('/', methods=['GET'])
 def process():
     data = 'Error: Pass a job url as a query parameter'
     url = request.args.get('url')
 
     print('URL:',url)
-
-    # Returns a dictionary in which the values are lists
-    # d = parse_qs(environ['QUERY_STRING'])
-
-    # As there can be more than one value for a variable then
-    # a list is provided as a default value.
-    # url = d.get('url', [''])[0] # Returns the first url value
 
     if not url:
         job = get_job_text(url)
@@ -146,14 +138,7 @@ def process():
 
         data = '\n'.join(questions) 
     
-    # start_response("200 OK", [
-    #     ("Content-Type", "text/plain"),
-    #     ("Content-Length", str(len(data)))
-    # ])
-
-    resp = make_response(data, 400)
+    resp = make_response(data)
     resp.headers['Content-Type'] = 'text/plain' 
     resp.headers['Content-Length'] = str(len(data)) 
     return resp
-
-    # return [bytes(data, 'utf-8')]
