@@ -22,8 +22,6 @@ app = Flask(__name__)
 # Get job details
 
 train_file_path = 'train-jobs.csv'
-# url = 'https://www.indeed.co.uk/viewjob?jk=b39ccb985a9de5e1&from=tp-serp&tk=1c29ob0im14he6rl'
-job = ''
 
 def get_job_text(url):
     with urllib.request.urlopen(url) as resource:
@@ -85,7 +83,7 @@ def create_model(train_file_path):
         alpha=0.001, max_iter=5, random_state=42)),
       ])
 
-    return text_clf_svm.fit(Ytrain_data, train_target)
+    return text_clf_svm.fit(train_data, train_target)
     
 # Get requirements
 
@@ -97,7 +95,7 @@ def get_requirements(model,job):
     test = test.reindex(np.random.permutation(test.index))
     test_data = test['Text'].values
     test_target = test['Requirement'].values
-    predicted_svm = text_clf_svm.predict(test_data)
+    predicted_svm = model.predict(test_data)
 
     # Select requirement sentances
     i = 0
@@ -126,19 +124,21 @@ def get_requirements(model,job):
 
 @app.route('/', methods=['GET'])
 def process():
-    data = 'Error: Pass a job url as a query parameter'
+    data = 'Error: Pass a job url as a query parameter\n'
     url = request.args.get('url')
+    resp_code = '400'
 
     print('URL:',url)
 
-    if not url:
+    if str(url):
         job = get_job_text(url)
         model = create_model(train_file_path)
-        questions = get_job_requirements(model_job)
+        questions = get_requirements(model,job)
 
         data = '\n'.join(questions) 
-    
-    resp = make_response(data)
+        resp_code = '200'
+
+    resp = make_response(data,resp_code)
     resp.headers['Content-Type'] = 'text/plain' 
     resp.headers['Content-Length'] = str(len(data)) 
     return resp
