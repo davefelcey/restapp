@@ -5,6 +5,9 @@ import pandas as pd
 import numpy as np
 import io
 
+import nltk
+from nltk import pos_tag
+
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
@@ -87,6 +90,42 @@ def create_model(train_file_path):
     
 # Get requirements
 
+def rephrase(s):
+    grammar = r"""
+      NP: {<DT|PP\$>?<JJ>*<NN>}   # chunk determiner/possessive, adjectives and noun
+          {<NNP>+}                # chunk sequences of proper nouns
+    """
+    s = 'able to work on your own initiative is essential'
+    sentance = s.split()
+    tagged_s = pos_tag(sentance)
+
+    cp = nltk.RegexpParser(grammar)
+    result = cp.parse(tagged_s)
+    term_noun = ''
+
+    for n in result.leaves():
+        if n[1] == 'NN' or n[1] == 'NNP':
+            term_noun = n[0]
+
+    # Create map
+
+    prefix = { 'experience in' : 'Do you have experience in',
+        'must have' : 'Do you have',
+        'ability to' : 'Can you',
+        'able to' : 'Can you',
+        'proficient in' : 'Are you proficient in'
+    }
+
+    w = s.lower().split()
+    p = '{0} {1}'.format(w[0],w[1])
+    p2 = prefix[p] 
+
+    ns = '{0} {1}'.format(p2, s[len(p) + 1:])
+    i = ns.find(term_noun) + len(term_noun)
+    q = '{0}?'.format(ns[:i])
+
+    return q
+
 def get_requirements(model,job):
     job_csv_data = sentence_tokenizer(job)
 
@@ -114,7 +153,7 @@ def get_requirements(model,job):
         if len(r.split()) > 2:
             r = r.strip()
             r = r[0].lower() + r[1:]
-            q = 'Do you have {0}?'.format(r)
+            q = rephrase(r) 
             # Correct any grammatical errors
             matches = tool.check(q)
             nq = language_check.correct(q, matches)
