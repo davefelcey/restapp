@@ -20,6 +20,8 @@ from flask import Flask
 from flask import request
 from flask import make_response 
 
+nltk.download('averaged_perceptron_tagger')
+
 app = Flask(__name__)
 
 # Get job details
