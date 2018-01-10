@@ -14,6 +14,7 @@ sklearn = "*"
 scipy = "*"
 language-check = "*"
 flask = "*"
+nltk = "*"
 
 
 [dev-packages]
