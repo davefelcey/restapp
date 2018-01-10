@@ -97,7 +97,6 @@ def rephrase(s):
       NP: {<DT|PP\$>?<JJ>*<NN>}   # chunk determiner/possessive, adjectives and noun
           {<NNP>+}                # chunk sequences of proper nouns
     """
-    s = 'able to work on your own initiative is essential'
     sentance = s.split()
     tagged_s = pos_tag(sentance)
 
