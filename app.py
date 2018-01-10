@@ -119,8 +119,10 @@ def rephrase(s):
 
     w = s.lower().split()
     p = '{0} {1}'.format(w[0],w[1])
-    p2 = prefix[p] 
+    v = prefix.get(p) 
 
+    p2 = v if v is not None else p 
+        
     ns = '{0} {1}'.format(p2, s[len(p) + 1:])
     i = ns.find(term_noun) + len(term_noun)
     q = '{0}?'.format(ns[:i])
