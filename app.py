@@ -173,7 +173,7 @@ def process():
     resp_code = '400'
 
     if url and str(url):
-        logger.info('URL: {0}',format(url))
+        logger.info(url)
         job = get_job_text(url)
         model = create_model(train_file_path)
         questions = get_requirements(model,job)
