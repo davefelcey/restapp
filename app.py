@@ -4,6 +4,7 @@ import re
 import pandas as pd
 import numpy as np
 import io
+import json
 
 import nltk
 from nltk import pos_tag
@@ -19,6 +20,12 @@ import language_check
 from flask import Flask
 from flask import request
 from flask import make_response 
+
+import logging
+
+logging.basicConfig(format='%(asctime)s %(message)s')
+logger = logging.getLogger('job-app')
+logger.setLevel(logging.INFO)
 
 nltk.download('averaged_perceptron_tagger')
 
@@ -93,39 +100,34 @@ def create_model(train_file_path):
 # Get requirements
 
 def rephrase(s):
-    grammar = r"""
-      NP: {<DT|PP\$>?<JJ>*<NN>}   # chunk determiner/possessive, adjectives and noun
-          {<NNP>+}                # chunk sequences of proper nouns
-    """
-    sentance = s.split()
-    tagged_s = pos_tag(sentance)
-
-    cp = nltk.RegexpParser(grammar)
-    result = cp.parse(tagged_s)
-    term_noun = ''
-
-    for n in result.leaves():
-        if n[1] == 'NN' or n[1] == 'NNP':
-            term_noun = n[0]
-
-    # Create map
-
-    prefix = { 'experience in' : 'Do you have experience in',
-        'must have' : 'Do you have',
-        'ability to' : 'Can you',
-        'able to' : 'Can you',
-        'proficient in' : 'Are you proficient in'
-    }
-
-    w = s.lower().split()
-    p = '{0} {1}'.format(w[0],w[1])
-    v = prefix.get(p) 
-
-    p2 = v if v is not None else p 
-        
-    ns = '{0} {1}'.format(p2, s[len(p) + 1:])
-    i = ns.find(term_noun) + len(term_noun)
-    q = '{0}?'.format(ns[:i])
+    startPrefix = {"expereince in":"Do you have expereince in",
+             "interest in":"Are you interested in",
+             "knowledge of":"Do you understand",
+             "able to":"Can you",
+             "have the":"Do you have the",
+             "ability to":"Can you",
+             "At least":"Do you have",
+                   "must be":"Are you",
+                   "should be":"Are you",
+                   "should have":"Do you have",
+                   "must have":"Do you have"
+                  }
+    startDefault = "One requierment for the position is "
+    
+    q = ""
+    
+    logger.debug(r)
+    
+    words = r.strip().split()
+    if len(words) > 2:
+        s = words[0].lower() + ' ' + words[1]
+        s1 = startPrefix.get(s, startDefault)
+        logger.debug(s)
+        logger.debug(s1)
+        s2 = r.lower() if s1 == startDefault else r[len(s):]
+        logger.debug(s2)
+        endPostfix = ". Do you have this" if s1 == startDefault else ""
+        q = '{0}{1}{2}?'.format(s1, s2, endPostfix)
 
     return q
 
@@ -177,10 +179,10 @@ def process():
         model = create_model(train_file_path)
         questions = get_requirements(model,job)
 
-        data = '\n'.join(questions) 
+        data = '\n'.join(json.dumps(questions, indent=4)) 
         resp_code = '200'
 
     resp = make_response(data,resp_code)
-    resp.headers['Content-Type'] = 'text/plain' 
+    resp.headers['Content-Type'] = 'application/json' 
     resp.headers['Content-Length'] = str(len(data)) 
     return resp
