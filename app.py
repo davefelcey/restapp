@@ -99,7 +99,7 @@ def create_model(train_file_path):
     
 # Get requirements
 
-def rephrase(s):
+def rephrase(r):
     startPrefix = {"expereince in":"Do you have expereince in",
              "interest in":"Are you interested in",
              "knowledge of":"Do you understand",
