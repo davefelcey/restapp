@@ -168,13 +168,12 @@ def get_requirements(model,job):
 
 @app.route('/', methods=['GET'])
 def process():
-    data = 'Error: Pass a job url as a query parameter\n'
+    data = '{ "Error":"Pass a job url as a query parameter" }'
     url = request.args.get('url')
     resp_code = '400'
 
-    print('URL:',url)
-
-    if str(url):
+    if url and str(url):
+        logger.info('URL: {0}',format(url))
         job = get_job_text(url)
         model = create_model(train_file_path)
         questions = get_requirements(model,job)
