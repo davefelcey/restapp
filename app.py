@@ -178,7 +178,7 @@ def process():
         model = create_model(train_file_path)
         questions = get_requirements(model,job)
 
-        data = '\n'.join(json.dumps(questions, indent=4)) 
+        data = json.dumps(questions, indent=4) 
         resp_code = '200'
 
     resp = make_response(data,resp_code)
