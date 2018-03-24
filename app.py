@@ -1,4 +1,4 @@
-import urllib.request
+import requests as req
 import html2text
 import re
 import pandas as pd
@@ -36,19 +36,23 @@ app = Flask(__name__)
 train_file_path = 'train-jobs.csv'
 
 def get_job_text(url):
-    with urllib.request.urlopen(url) as resource:
-        h = html2text.HTML2Text()
-        h.ignore_images = True
-        h.ignore_links = True
-        h.ignore_emphasis = True
-        h.ignore_anchors = True
-        h.drop_white_space = True
-        h.unicode_snob = True
+    request_headers = {
+        "Accept-Language": "en-US,en;q=0.5",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Connection": "keep-alive" 
+    }
 
-        content = resource.read()
-        charset = resource.headers.get_content_charset()
-        content = content.decode(charset)
-        return h.handle(content)
+    resp = req.get(url, headers=request_headers)
+    h = html2text.HTML2Text()
+    h.ignore_images = True
+    h.ignore_links = True
+    h.ignore_emphasis = True
+    h.ignore_anchors = True
+    h.drop_white_space = True
+    h.unicode_snob = True
+
+    return h.handle(resp.text)
 
 # Format job
 
